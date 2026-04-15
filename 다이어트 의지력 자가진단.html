@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>다이어트 클리닉 AI 문진 - 의지력 자가진단</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #1B5E3B;
+  --green-mid: #2D7A55;
+  --green-light: #52B788;
+  --green-pale: #D8F3DC;
+  --accent: #E76F51;
+  --accent-pale: #FDE8E0;
+  --bg: #F4F8F5;
+  --white: #FFFFFF;
+  --text: #1A2E24;
+  --text-mid: #4A6358;
+  --text-light: #8FAD9A;
+  --border: #C5DDD0;
+  --shadow: 0 4px 20px rgba(27,94,59,0.10);
+  --r: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+header {
+  background: var(--green);
+  padding: 16px 20px 13px;
+  text-align: center;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+}
+header h1 { color: #fff; font-size: 1.15rem; font-weight: 700; }
+header p  { color: #A8D5B8; font-size: 0.75rem; margin-top: 2px; font-weight: 300; }
+.hospital-name {
+  color: #FF3B3B;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-bottom: 7px;
+}
+#prog-wrap { max-width: 520px; margin: 0 auto; padding: 14px 20px 0; }
+#prog-label { font-size: 0.72rem; color: var(--text-light); margin-bottom: 5px; }
+#prog-bar { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+#prog-fill { height: 100%; background: linear-gradient(90deg, var(--green-light), var(--accent)); border-radius: 99px; transition: width 0.5s ease; width: 0%; }
+main { max-width: 520px; margin: 0 auto; padding: 16px 16px 80px; }
+.screen { display: none; }
+.screen.active { display: block; animation: up 0.4s ease both; }
+@keyframes up { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+
+/* INTRO */
+#s-intro { text-align: center; padding: 20px 0 10px; }
+.intro-icon { width: 82px; height: 82px; border-radius: 50%; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-size: 2.6rem; margin: 0 auto 18px; }
+#s-intro h2 { font-size: 1.45rem; color: var(--green); line-height: 1.4; margin-bottom: 10px; }
+#s-intro > p { color: var(--text-mid); font-size: 0.9rem; line-height: 1.75; margin-bottom: 22px; }
+.notice { background: var(--accent-pale); border-left: 4px solid var(--accent); border-radius: 10px; padding: 11px 15px; font-size: 0.8rem; color: #7A3B26; text-align: left; line-height: 1.65; margin-bottom: 26px; }
+
+/* CARD */
+.card { background: var(--white); border-radius: var(--r); box-shadow: var(--shadow); padding: 22px 20px 18px; margin-bottom: 14px; border: 1px solid var(--border); }
+.section-title { font-size: 0.72rem; font-weight: 700; color: var(--green-mid); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--green-pale); }
+.question { margin-bottom: 22px; }
+.question:last-child { margin-bottom: 0; }
+.q-num { font-size: 0.75rem; color: var(--green-light); font-weight: 700; margin-bottom: 6px; }
+.q-text { font-size: 0.95rem; color: var(--text); line-height: 1.5; font-weight: 500; margin-bottom: 12px; }
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.option { 
+  padding: 12px 14px; 
+  border: 1.5px solid var(--border); 
+  border-radius: 12px; 
+  font-size: 0.88rem; 
+  color: var(--text-mid); 
+  cursor: pointer; 
+  transition: all 0.2s; 
+  text-align: center;
+  background: #fff;
+}
+.option:hover { background: var(--green-pale); border-color: var(--green-light); }
+.option.selected { 
+  background: var(--green); 
+  color: white; 
+  border-color: var(--green); 
+  font-weight: 500;
+}
+
+/* BUTTONS */
+.btn { display: block; width: 100%; padding: 14px; background: var(--green); color: #fff; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+.btn:hover { background: var(--green-mid); }
+.btn:active { transform: scale(0.98); }
+.btn-outline { background: transparent; color: var(--green); border: 2px solid var(--green); margin-top: 10px; }
+.btn-outline:hover { background: var(--green-pale); }
+
+/* RESULT */
+#s-result { padding-top: 4px; }
+.result-hero { background: linear-gradient(135deg, var(--green) 0%, var(--green-mid) 100%); border-radius: var(--r); padding: 26px 22px; text-align: center; margin-bottom: 14px; color: #fff; position: relative; overflow: hidden; }
+.result-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 60%); }
+.result-hero .badge { display: inline-block; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); border-radius: 99px; padding: 3px 12px; font-size: 0.72rem; letter-spacing: 0.08em; margin-bottom: 10px; color: #D8F3DC; }
+.result-hero .score-big { font-size: 3.8rem; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+.result-hero .score-label { font-size: 1.05rem; opacity: 0.9; }
+.result-type { background: var(--accent); display: inline-block; border-radius: 99px; padding: 6px 20px; font-size: 1.1rem; font-weight: 700; margin: 12px 0; }
+
+.result-section-title { font-size: 0.72rem; font-weight: 700; color: var(--green-mid); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 10px; }
+.strategy-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; background: var(--green-pale); border-radius: 10px; margin-bottom: 8px; font-size: 0.88rem; color: var(--green); font-weight: 500; line-height: 1.45; }
+.strategy-item::before { content: '✓'; width: 20px; height: 20px; background: var(--green); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; margin-top: 1px; }
+.disclaimer { background: #FFF8E7; border: 1px solid #F5D76E; border-radius: 10px; padding: 11px 14px; font-size: 0.76rem; color: #7D6608; line-height: 1.6; margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hospital-name">HJ 매그놀리아병원 산부인과</div>
+  <h1>🌿 다이어트 클리닉 AI 문진</h1>
+</header>
+
+<div id="prog-wrap">
+  <div id="prog-label">시작 전</div>
+  <div id="prog-bar"><div id="prog-fill"></div></div>
+</div>
+
+<main>
+
+  <!-- INTRO -->
+  <div class="screen active" id="s-intro">
+    <div class="intro-icon">💪</div>
+    <h2>다이어트 의지력<br>자가 진단</h2>
+    <p>10개 문항으로 나의 다이어트 실행력을<br>정확하게 분석해 드립니다.</p>
+    <div class="notice">
+      🔒 <strong>개인정보 보호</strong><br>
+      입력하신 내용은 서버에 전송되거나 저장되지 않습니다.<br>
+      브라우저를 닫으면 모든 데이터가 사라집니다.
+    </div>
+    <button class="btn" onclick="goTo('s-form')">진단 시작하기 →</button>
+  </div>
+
+  <!-- FORM -->
+  <div class="screen" id="s-form">
+    <div class="card">
+      <div class="section-title">다이어트 의지력 자가진단 (10문항)</div>
+      <div id="questions-container"></div>
+    </div>
+
+    <button class="btn" id="submit-button" onclick="analyze()" style="display:none;">결과 확인하기 →</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="s-result">
+    <div class="result-hero">
+      <div class="badge">의지력 진단 결과</div>
+      <div class="score-big" id="r-score">—</div>
+      <div class="score-label">/ 40점</div>
+      <div class="result-type" id="r-type">—</div>
+    </div>
+
+    <div class="card">
+      <div class="result-section-title">📋 진단 해석</div>
+      <div id="r-desc" style="font-size:0.9rem; line-height:1.6; color:var(--text-mid);"></div>
+    </div>
+
+    <div class="card">
+      <div class="result-section-title">💊 맞춤 처방</div>
+      <div id="r-rx"></div>
+    </div>
+
+    <div class="disclaimer">
+      ⚠️ 이 결과는 참고용 자가진단입니다. 보다 정확한 상담은 전문의와 진행하세요.
+    </div>
+    <button class="btn btn-outline" onclick="reset()">↺ 다시 진단하기</button>
+  </div>
+
+</main>
+
+<script>
+// 질문 데이터
+const questions = [
+  { id: 0, text: "다이어트를 해야 하는 이유가 명확하다", options: ["매우 명확하다", "어느 정도 있다", "그냥 하고 싶다", "잘 모르겠다"] },
+  { id: 1, text: "식단 조절을 2주 이상 유지한 경험", options: ["여러 번 성공", "한두 번 성공", "도전했지만 실패", "해본 적 없다"] },
+  { id: 2, text: "스트레스 상황에서의 음식 섭취", options: ["거의 먹지 않는다", "가끔 먹는다", "자주 먹는다", "항상 먹는다"] },
+  { id: 3, text: "음식 유혹을 참는 능력", options: ["잘 참는다", "보통이다", "참기 어렵다", "전혀 못 참는다"] },
+  { id: 4, text: "주 3회 이상 운동 실천 가능성", options: ["충분히 가능", "노력하면 가능", "어렵다", "불가능하다"] },
+  { id: 5, text: "식습관·생활습관 변화 의지", options: ["이미 실행 중", "의지가 강하다", "힘들 것 같다", "변화가 싫다"] },
+  { id: 6, text: "건강과 체중 중 우선순위", options: ["건강이 최우선", "어느 정도 둘 다", "체중 감량이 목표", "잘 모르겠다"] },
+  { id: 7, text: "혼자서 다이어트를 지속할 수 있는가", options: ["혼자 가능하다", "어느 정도 가능", "도움이 필요하다", "혼자는 불가능"] },
+  { id: 8, text: "과거 다이어트 실패 원인 파악", options: ["명확히 안다", "어느 정도 안다", "잘 모른다", "생각해본 적 없다"] },
+  { id: 9, text: "이번 다이어트 성공에 대한 확신", options: ["강한 확신 있다", "가능성이 높다", "반반이다", "자신이 없다"] }
+];
+
+// 결과 데이터
+const results = [
+  {
+    min: 35,
+    label: "고의지 실행형",
+    emoji: "🔥",
+    desc: "동기와 실행력이 모두 갖추어진 최적의 상태입니다. 지금 바로 체계적인 다이어트 프로그램을 시작하면 높은 성공률을 기대할 수 있습니다.",
+    rx: [
+      "구체적인 목표 체중과 기간을 설정하세요",
+      "주간 식단표를 미리 작성해 계획적으로 실천하세요",
+      "운동 루틴을 먼저 고정하고 나머지를 맞추세요"
+    ]
+  },
+  {
+    min: 28,
+    label: "준비된 실행형",
+    emoji: "💪",
+    desc: "의지와 준비가 충분합니다. 명확한 방향과 실천 계획만 세우면 충분히 성공할 수 있는 좋은 상태입니다.",
+    rx: [
+      "첫 2주 집중 루틴을 설계하고 작은 성공을 쌓으세요",
+      "식욕 패턴을 기록하고 취약 시간대를 파악하세요",
+      "신뢰할 수 있는 동반자 또는 코치를 찾으세요"
+    ]
+  },
+  {
+    min: 20,
+    label: "흔들리는 의지형",
+    emoji: "🌊",
+    desc: "의지는 있지만 감정과 식욕에 쉽게 흔들리는 상태입니다. 먼저 식욕 패턴과 감정 관리를 강화하는 것이 중요합니다.",
+    rx: [
+      "스트레스 상황을 대비한 대처법을 미리 준비하세요",
+      "하루 식단을 3가지 규칙으로 단순화하세요",
+      "뇌새김 식욕 관리 훈련부터 시작하세요"
+    ]
+  },
+  {
+    min: 0,
+    label: "동기 강화 필요형",
+    emoji: "🔍",
+    desc: "지금은 다이어트 실행보다 ‘왜 해야 하는지’를 먼저 명확히 하는 것이 중요합니다. 동기부터 강화해야 합니다.",
+    rx: [
+      "다이어트를 원하는 가장 솔직한 이유를 적어보세요",
+      "작고 쉬운 변화 하나부터 시작해 자신감을 키우세요",
+      "전문 상담사와 1:1 동기 강화 세션을 받아보세요"
+    ]
+  }
+];
+
+let answers = new Array(10).fill(null);
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = ['s-intro','s-form','s-result'].indexOf(id);
+  document.getElementById('prog-fill').style.width = (idx / 2 * 100) + '%';
+  document.getElementById('prog-label').textContent = ['시작 전','진단 중','결과 확인'][idx];
+}
+
+function buildQuestions() {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  
+  questions.forEach((q, index) => {
+    const div = document.createElement('div');
+    div.className = 'question';
+    div.innerHTML = `
+      <div class="q-num">Q${String(index+1).padStart(2,'0')}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="options" id="opt-group-${index}"></div>
+    `;
+    container.appendChild(div);
+    
+    const optGroup = div.querySelector(`#opt-group-${index}`);
+    q.options.forEach((opt, optIndex) => {
+      const score = 4 - optIndex; // 4,3,2,1 점
+      const optDiv = document.createElement('div');
+      optDiv.className = 'option';
+      optDiv.textContent = opt;
+      optDiv.onclick = () => selectOption(index, optDiv, score);
+      optGroup.appendChild(optDiv);
+    });
+  });
+}
+
+function selectOption(qIndex, selectedElement, score) {
+  answers[qIndex] = score;
+  
+  // 같은 그룹 내 선택 해제
+  const group = selectedElement.parentElement;
+  group.querySelectorAll('.option').forEach(el => el.classList.remove('selected'));
+  selectedElement.classList.add('selected');
+  
+  // 모든 질문 답변 완료 체크
+  checkAllAnswered();
+}
+
+function checkAllAnswered() {
+  const allAnswered = answers.every(a => a !== null);
+  document.getElementById('submit-button').style.display = allAnswered ? 'block' : 'none';
+}
+
+function analyze() {
+  const total = answers.reduce((sum, val) => sum + val, 0);
+  
+  let result = results[3]; // 기본값
+  for (let r of results) {
+    if (total >= r.min) {
+      result = r;
+      break;
+    }
+  }
+  
+  // 결과 화면 채우기
+  document.getElementById('r-score').textContent = total;
+  document.getElementById('r-type').innerHTML = `${result.emoji} ${result.label}`;
+  document.getElementById('r-desc').textContent = result.desc;
+  
+  const rxHTML = result.rx.map(item => `
+    <div class="strategy-item">${item}</div>
+  `).join('');
+  document.getElementById('r-rx').innerHTML = rxHTML;
+  
+  goTo('s-result');
+}
+
+function reset() {
+  answers = new Array(10).fill(null);
+  buildQuestions();
+  document.getElementById('submit-button').style.display = 'none';
+  goTo('s-intro');
+}
+
+// 초기화
+buildQuestions();
+</script>
+</body>
+</html>
